@@ -1,10 +1,10 @@
 import { StyleSheet, Text, View } from "react-native";
 import React from "react";
 
-export default function TabLayout() {
+export default function SLide() {
   return (
     <View>
-      <Text>TabLayout</Text>
+      <Text>SLide</Text>
     </View>
   );
 }
