@@ -8,6 +8,12 @@ import { IsIPAD } from "@/themes/app.constant";
 import { Dimensions, Image } from "react-native";
 import { scale, verticalScale } from "react-native-size-matters";
 
+export enum Side {
+  LEFT,
+  RIGHT,
+  NONE,
+}
+
 export const onBoardingSlides: onBoardingSlidesTypes[] = [
   {
     color: "#40E0D0",

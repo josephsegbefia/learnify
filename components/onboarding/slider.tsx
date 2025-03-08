@@ -1,24 +1,26 @@
-import { StyleSheet, Text, View } from "react-native";
-import React from "react";
-import {
+import React, { useEffect } from "react";
+import { Platform, StyleSheet, View } from "react-native";
+import Wave from "./wave";
+import Animated, {
   runOnJS,
   useAnimatedStyle,
   useSharedValue,
   withSpring,
 } from "react-native-reanimated";
-import { Side } from "./wave";
-import { useVector, snapPoint } from "react-native-redash";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import { snapPoint, useVector } from "react-native-redash";
 import {
   HEIGHT,
-  LEFT_SNAP_POINTS,
   MARGIN_WIDTH,
   MIN_LEDGE,
-  NEXT,
-  PREV,
-  RIGHT_SNAP_POINTS,
+  Side,
   WIDTH,
 } from "@/configs/constants";
-import { Gesture } from "react-native-gesture-handler";
+
+const PREV = WIDTH;
+const NEXT = 0;
+const LEFT_SNAP_POINTS = [MARGIN_WIDTH, PREV];
+const RIGHT_SNAP_POINTS = [NEXT, WIDTH - MARGIN_WIDTH];
 
 interface SliderProps {
   index: number;
@@ -27,16 +29,16 @@ interface SliderProps {
   prev?: JSX.Element;
   next?: JSX.Element;
 }
-export default function Slider({
+
+const Slider = ({
   index,
   children: current,
   prev,
   next,
   setIndex,
-}: SliderProps) {
+}: SliderProps) => {
   const hasPrev = !!prev;
   const hasNext = !!next;
-
   const zIndex = useSharedValue(0);
   const activeSide = useSharedValue(Side.NONE);
   const isTransitionLeft = useSharedValue(false);
@@ -44,10 +46,11 @@ export default function Slider({
   const left = useVector(MIN_LEDGE, HEIGHT / 2);
   const right = useVector(MIN_LEDGE, HEIGHT / 2);
 
-  const pannedGesture = Gesture.Pan()
+  const panGesture = Gesture.Pan()
     .onStart(({ x }) => {
       if (x <= MARGIN_WIDTH && hasPrev) {
-        (activeSide.value = Side.LEFT), (zIndex.value = 100);
+        activeSide.value = Side.LEFT;
+        zIndex.value = 100;
       } else if (x >= WIDTH - MARGIN_WIDTH && hasNext) {
         activeSide.value = Side.RIGHT;
       } else {
@@ -60,6 +63,7 @@ export default function Slider({
         left.y.value = y;
       } else if (activeSide.value === Side.RIGHT) {
         right.x.value = Math.max(WIDTH - x, MARGIN_WIDTH);
+        right.y.value = y;
       }
     })
     .onEnd(({ x, velocityX, velocityY }) => {
@@ -83,7 +87,6 @@ export default function Slider({
             }
           }
         );
-
         left.y.value = withSpring(HEIGHT / 2, { velocity: velocityY });
       } else if (activeSide.value === Side.RIGHT) {
         const dest = snapPoint(x, velocityX, RIGHT_SNAP_POINTS);
@@ -108,12 +111,47 @@ export default function Slider({
       }
     });
 
-  const leftStyle = useAnimatedStyle(() => ({}));
-  return (
-    <View>
-      <Text>Slider</Text>
-    </View>
-  );
-}
+  const leftStyle = useAnimatedStyle(() => ({
+    zIndex: zIndex.value,
+  }));
 
-const styles = StyleSheet.create({});
+  useEffect(() => {
+    if (Platform.OS === "ios") {
+      right.x.value = withSpring(WIDTH * 0.167);
+    } else {
+      right.x.value = withSpring(WIDTH * 0.185);
+    }
+  }, [left, right]);
+
+  return (
+    <GestureDetector gesture={panGesture}>
+      <Animated.View style={StyleSheet.absoluteFill}>
+        {current}
+        {prev && (
+          <Animated.View style={[StyleSheet.absoluteFill, leftStyle]}>
+            <Wave
+              side={Side.LEFT}
+              position={left}
+              isTransitioning={isTransitionLeft}
+            >
+              {prev}
+            </Wave>
+          </Animated.View>
+        )}
+        {next && (
+          <View style={StyleSheet.absoluteFill}>
+            <Wave
+              side={Side.RIGHT}
+              position={right}
+              isTransitioning={isTransitionRight}
+            >
+              {next}
+            </Wave>
+          </View>
+        )}
+      </Animated.View>
+    </GestureDetector>
+  );
+};
+
+export default Slider;

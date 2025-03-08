@@ -1,4 +1,3 @@
-import { StyleSheet, Text, View } from "react-native";
 import React, { useState } from "react";
 import { onBoardingSlides } from "@/configs/constants";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -9,6 +8,7 @@ export default function OnboardingScreen() {
   const [index, setIndex] = useState(0);
   const prev = onBoardingSlides[index - 1];
   const next = onBoardingSlides[index + 1];
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <Slider
@@ -16,14 +16,33 @@ export default function OnboardingScreen() {
         index={index}
         setIndex={setIndex}
         prev={
-          prev && <Slide slide={prev} totalSlides={onBoardingSlides.length} />
+          prev && (
+            <Slide
+              index={index}
+              setIndex={setIndex}
+              slide={prev}
+              totalSlides={onBoardingSlides.length}
+            />
+          )
         }
         next={
-          next && <Slide slide={next} totalSlides={onBoardingSlides.length} />
+          next && (
+            <Slide
+              index={index}
+              setIndex={setIndex}
+              slide={next}
+              totalSlides={onBoardingSlides.length}
+            />
+          )
         }
-      ></Slider>
+      >
+        <Slide
+          slide={onBoardingSlides[index]}
+          index={index}
+          setIndex={setIndex}
+          totalSlides={onBoardingSlides.length}
+        />
+      </Slider>
     </GestureHandlerRootView>
   );
 }
-
-const styles = StyleSheet.create({});
