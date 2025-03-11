@@ -1,4 +1,5 @@
 import {
+  Modal,
   Platform,
   Pressable,
   StyleSheet,
@@ -20,6 +21,7 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
+import AuthModal from "../auth/auth.modal";
 
 interface SlideProps {
   slide: onBoardingSlidesTypes;
@@ -141,6 +143,16 @@ export default function Slide({
           />
         </TouchableOpacity>
       )}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(!modalVisible)}
+      >
+        <Pressable style={{ flex: 1 }}>
+          <AuthModal />
+        </Pressable>
+      </Modal>
     </>
   );
 }
