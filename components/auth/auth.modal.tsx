@@ -1,5 +1,5 @@
 import { View, Text, Pressable, Image, Platform } from "react-native";
-import React from "react";
+import React, { useEffect } from "react";
 import { BlurView } from "expo-blur";
 import { windowWidth, windowHeight, fontSizes } from "@/themes/app.constant";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
@@ -11,9 +11,27 @@ export default function AuthModal() {
       GoogleSignin.configure({
         iosClientId: process.env.EXPO_PUBLIC_IOS_GOOGLE_API_KEY,
       });
+    } else {
+      GoogleSignin.configure({
+        webClientId:
+          "293252236081-4jafus48c3gqahvsp2eqi8men0jt0g95.apps.googleusercontent.com",
+      });
     }
   };
-  const googleSignIn = async () => {};
+
+  useEffect(() => {
+    configureGoogleSignIn();
+  }, []);
+
+  const googleSignIn = async () => {
+    try {
+      await GoogleSignin.hasPlayServices();
+      const userInfo = await GoogleSignin.signIn();
+      console.log(userInfo);
+    } catch (error) {
+      console.log(error);
+    }
+  };
   return (
     <BlurView
       style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
